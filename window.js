@@ -2,36 +2,6 @@ import koffi from 'koffi';
 
 const user32 = koffi.load('user32.dll');
 
-const UINT = koffi.alias('UINT', 'int');
-const DWORD = koffi.alias('DWORD', 'uint32_t');
-const HANDLE = koffi.pointer(koffi.opaque('HANDLE'));
-const HWND = koffi.alias('HWND', HANDLE);
-const HDC = koffi.alias('HDC', HANDLE);
-const LPCSTR = koffi.alias('LPCSTR', 'const char*');
-
-const POINT = koffi.struct('RECT', {
-    left: 'long',
-    top: 'long',
-    right: 'long',
-    bottom: 'long'
-});
-
-
-const PWINDOWINFO = koffi.struct('PWINDOWINFO', {
-    cbSize: 'DWORD',           // Size of the structure in bytes
-    rcWindow: 'RECT',         // Rectangle containing the window coordinates
-    rcClient: 'RECT',         // Rectangle containing the client area coordinates
-    dwStyle: 'DWORD',         // Window styles
-    dwExStyle: 'DWORD',       // Extended window styles
-    dwWindowStatus: 'DWORD',  // Window status flags
-    cxWindowBorders: 'UINT',  // Width of window borders
-    cyWindowBorders: 'UINT',  // Height of window borders
-    atomWindowType: 'int',   // Atom value of the window type
-    wCreatorVersion: 'int32'   // Creator version of the window
-});
-
-
-
 
 
 const GetWindowThreadProcessId = user32.func('DWORD __stdcall GetWindowThreadProcessId(HWND hWnd, _Out_ DWORD *lpdwProcessId)');

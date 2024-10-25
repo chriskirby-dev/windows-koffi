@@ -1,5 +1,10 @@
+import * as types from './inc/types.js';
+import * as struct from './inc/struct.js';
 import * as pix from './pixel.js';
 import * as win from './window.js';
+import * as input from './input/input.js';
+
+export const Mouse = input.Mouse;
 
 export const Window = win.Window;
 

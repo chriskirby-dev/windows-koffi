@@ -5,14 +5,15 @@ import Window from './window.js'
 const user32 = koffi.load('user32.dll');
 const gdi32 = koffi.load('gdi32.dll');
 
-const SetProcessDPIAware = user32.func('bool __stdcall SetProcessDPIAware()');
+const BOOL = koffi.alias('BOOL', 'bool');
+const COLORREF = koffi.alias('COLORREF', 'uint32_t');
+
+
+const SetProcessDPIAware = user32.func('int __stdcall SetProcessDPIAware()');
 const GetCursorPos = user32.func('int __stdcall GetCursorPos(_Out_ POINT *pos)');
 const GetPixel = gdi32.func('COLORREF __stdcall GetPixel(HDC hdc, int x, int y)');
 
-const POINT = koffi.struct('POINT', {
-    x: 'long',
-    y: 'long'
-});
+
 
 export function getCursorPosition(){
     let pos = {};
