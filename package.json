@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "koffi": "^2.7.3"
+    "koffi": "^2.9.1"
   }
 }
