@@ -103,6 +103,14 @@ export function WindowDetail(hwnd) {
 export class Window {
     static winEventHooks = new Map();
 
+    static all() {
+        const windows = [];
+        EnumWindows((hwnd) => {
+            windows.push(new Window(hwnd));
+        }, 0);
+        return windows;
+    }
+
     static fromDesktop() {
         const handle = GetDesktopWindow();
         return new Window(handle);
@@ -170,24 +178,24 @@ export class Window {
 
         this.center = {
             x: this.width / 2,
-            y: this.height / 2,
+            y: this.height / 2
         };
 
         const _rect = {
             width: rect.right - rect.left,
             height: rect.bottom - rect.top,
             x: rect.left,
-            y: rect.top,
+            y: rect.top
         };
 
         const _client = {
             width: client.right - client.left,
-            height: client.bottom - client.top,
+            height: client.bottom - client.top
         };
 
         const _border = {
             x: _rect.width - _client.width,
-            y: _rect.height - _client.height,
+            y: _rect.height - _client.height
         };
         _border.width = _border.x / 2;
         _border.left = _border.x / 2;

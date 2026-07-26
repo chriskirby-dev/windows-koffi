@@ -3,7 +3,7 @@ import * as struct from "./inc/struct.js";
 import * as pix from "./pixel.js";
 import * as win from "./window.js";
 import * as input from "./input/input.js";
-import * as pipes from "./pipes.js";
+import * as pipes from "./pipes/pipes.js";
 //import * as apps from "./applications.js";
 
 export const Mouse = input.Mouse;
