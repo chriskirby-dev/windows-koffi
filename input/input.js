@@ -1,6 +1,7 @@
 import koffi from 'koffi';
 
-import Window from '../window.js';
+import '../inc/types.js';
+import '../inc/struct.js';
 
 const user32 = koffi.load('user32.dll');
 
@@ -43,7 +44,7 @@ const HARDWAREINPUT = koffi.struct('HARDWAREINPUT', {
     wParamH: 'uint16_t'
 });
 
-const INPUT = koffi.struct('INPUT', {
+export const INPUT = koffi.struct('INPUT', {
     type: 'uint32_t',
     u: koffi.union({
         mi: MOUSEINPUT,
@@ -54,7 +55,7 @@ const INPUT = koffi.struct('INPUT', {
 
 
 // Functions declarations
-const SendInput = user32.func('unsigned int __stdcall SendInput(uint32_t cInputs, INPUT *pInputs, int cbSize)');
+export const SendInput = user32.func('unsigned int __stdcall SendInput(uint32_t cInputs, INPUT *pInputs, int cbSize)');
 const sendMessage = user32.func('int __stdcall SendMessageW(HWND hWnd, unsigned int Msg, uint16_t wParam, long lParam)');
 const setCursorPos = user32.func('bool __stdcall SetCursorPos(int X, int Y)');
 const GetCursorPos = user32.func('int __stdcall GetCursorPos(_Out_ POINT *pos)');

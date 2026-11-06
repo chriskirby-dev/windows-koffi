@@ -7,6 +7,7 @@ import * as pipes from "./pipes/pipes.js";
 //import * as apps from "./applications.js";
 
 export const Mouse = input.Mouse;
+export { Keyboard, typeText } from './keyboard.js';
 
 export const Window = win.Window;
 
