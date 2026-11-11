@@ -7,7 +7,7 @@ const KEYEVENTF_UNICODE = 0x0004;
 const inputSize = koffi.sizeof(INPUT);
 
 /** Types into the focused window. Speed is characters/second; randomness is 0–1. */
-export async function typeText(text, { speed = 10, randomness = 0 } = {}) {
+export async function typeText(text, { speed = 10, randomness = 0, signal } = {}) {
     if (typeof text !== 'string') throw new TypeError('text must be a string');
     if (!Number.isFinite(speed) || speed <= 0) {
         throw new RangeError('speed must be a finite number greater than zero');
@@ -21,11 +21,13 @@ export async function typeText(text, { speed = 10, randomness = 0 } = {}) {
         throw new RangeError('speed is too low for the requested timing');
     }
 
+    signal?.throwIfAborted();
     let first = true;
     for (const character of text.replace(/\r\n?/g, '\n')) {
         if (!first) {
-            await delay(interval * (1 + (Math.random() * 2 - 1) * randomness));
+            await delay(interval * (1 + (Math.random() * 2 - 1) * randomness), undefined, { signal });
         }
+        signal?.throwIfAborted();
         first = false;
         const vk = character === '\n' ? 0x0D : character === '\t' ? 0x09 : 0;
         const events = [];
