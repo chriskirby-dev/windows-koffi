@@ -2,8 +2,20 @@ import koffi from "koffi";
 import "./inc/types.js";
 import { getWindowPixel, getPixel } from "./pixel.js";
 import { capture } from "./capture.js";
+import { setTaskbarVisible } from "./taskbar.js";
 
 const user32 = koffi.load("user32.dll");
+const dwmapi = koffi.load("dwmapi.dll");
+const EnumWindowCallback = koffi.proto("int __stdcall WindowListCallback(HWND hwnd, intptr_t param)");
+const EnumWindows = user32.func("int __stdcall EnumWindows(WindowListCallback *callback, intptr_t param)");
+const IsWindow = user32.func("int __stdcall IsWindow(HWND hwnd)");
+const IsWindowVisible = user32.func("int __stdcall IsWindowVisible(HWND hwnd)");
+const IsIconic = user32.func("int __stdcall IsIconic(HWND hwnd)");
+const GetForegroundWindow = user32.func("HWND __stdcall GetForegroundWindow()");
+const ReadWindowStyle = user32.func("int32_t __stdcall GetWindowLongW(HWND hwnd, int index)");
+const GetOwner = user32.func("HWND __stdcall GetWindow(HWND hwnd, unsigned int command)");
+const MonitorFromRect = user32.func("void * __stdcall MonitorFromRect(const RECT *rect, uint32_t flags)");
+const DwmGetWindowAttribute = dwmapi.func("int32_t __stdcall DwmGetWindowAttribute(HWND hwnd, uint32_t attribute, _Out_ uint32_t *value, uint32_t size)");
 
 const GetWindowThreadProcessId = user32.func(
     "DWORD __stdcall GetWindowThreadProcessId(HWND hWnd, _Out_ DWORD *lpdwProcessId)"
@@ -107,6 +119,7 @@ export class Window {
         const windows = [];
         EnumWindows((hwnd) => {
             windows.push(new Window(hwnd));
+            return 1;
         }, 0);
         return windows;
     }
@@ -151,6 +164,10 @@ export class Window {
 
     focus() {
         return BringWindowToTop(this.hwnd);
+    }
+
+    setTaskbarVisible(visible) {
+        return setTaskbarVisible(this.hwnd, visible);
     }
 
     getDC() {
@@ -306,6 +323,34 @@ export class Window {
         let length = GetWindowText(this.hwnd, buf, buf.length);
         this.title = koffi.decode(buf, "char", length);
         this.updateBounds();
+        this.updateVisibility();
+    }
+
+    // Snapshot only: hidden windows can later be shown by their application.
+    updateVisibility() {
+        this.isValid = Boolean(IsWindow(this.hwnd));
+        this.isVisible = this.isValid && Boolean(IsWindowVisible(this.hwnd));
+        this.isMinimized = this.isValid && Boolean(IsIconic(this.hwnd));
+        this.isForeground = this.isValid && this.hwnd === GetForegroundWindow();
+        const style = ReadWindowStyle(this.hwnd, -16);
+        const extendedStyle = ReadWindowStyle(this.hwnd, -20);
+        this.isToolWindow = Boolean(extendedStyle & 0x80);
+        this.isApplicationWindow = this.isValid && !(style & 0x40000000) &&
+            (Boolean(extendedStyle & 0x40000) ||
+                (!this.isToolWindow && !(extendedStyle & 0x08000000) && !GetOwner(this.hwnd, 4))) &&
+            (this.isVisible || this.isMinimized);
+        this.isBackgroundWindow = this.isValid && !this.isApplicationWindow;
+        const cloaked = [0];
+        this.isCloaked = this.isValid && DwmGetWindowAttribute(this.hwnd, 14, cloaked, 4) === 0
+            ? cloaked[0] !== 0 : null;
+        const rect = {};
+        this.isOnScreen = Boolean(this.isValid && GetWindowRect(this.hwnd, rect) &&
+            rect.right > rect.left && rect.bottom > rect.top && MonitorFromRect(rect, 0));
+        this.isVisibleOnDesktop = !this.isVisible || this.isMinimized || !this.isOnScreen
+            ? false : this.isCloaked === null ? null : !this.isCloaked;
+        // General cross-process compositor occlusion is not available through these APIs.
+        this.isOccluded = null;
+        return this;
     }
 }
 
