@@ -6,12 +6,20 @@ Get desktop windows with descriptors
 
 ```js
 const windows = Window.all();
-const applications = windows.filter(window => window.isApplicationWindow);
-const desktopWindows = windows.filter(window => window.isVisibleOnDesktop === true);
+const applications = Window.all({ isApplication: true });
+const desktopWindows = Window.all({ isVisible: true });
+const visibleApplications = Window.all({ isApplication: true, isVisible: true });
 window.updateVisibility(); // Refresh the state on an existing Window instance.
 ```
 
-Listing returns all top-level windows, with these snapshot properties:
+Omit either filter (or pass `undefined`) to leave that property unrestricted.
+The `isApplication` filter checks `isApplicationWindow`; the `isVisible` filter
+checks `isVisibleOnDesktop` (not the raw `isVisible` Windows style property).
+Pass `false` to match only false values. `isVisible: null` matches unknown
+visibility; unknown values do not match `false`. Filters combine with AND and can
+be used alongside `mustHaveTitle`, `mustHaveClassName`, and `mustHaveSize`.
+
+Listing returns all matching top-level windows, with these snapshot properties:
 
 | Property | Meaning |
 | --- | --- |

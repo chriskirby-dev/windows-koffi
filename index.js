@@ -33,3 +33,6 @@ export const getCursorPosition = pix.getCursorPosition;
 //export const getApplications = apps.getApplications;
 
 export const duplexPipe = pipes.duplexPipe;
+
+export { capture, captureMonitor, captureWindow } from "./capture.js";
+export { getMonitors } from "./monitor.js";

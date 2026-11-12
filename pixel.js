@@ -1,4 +1,6 @@
 import koffi from 'koffi';
+import './inc/types.js';
+import './inc/struct.js';
 
 import Window from './window.js'
 

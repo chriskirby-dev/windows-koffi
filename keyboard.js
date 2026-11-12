@@ -8,8 +8,6 @@ const inputSize = koffi.sizeof(INPUT);
 
 /** Types into the focused window. Speed is characters/second; randomness is 0–1. */
 export async function typeText(text, { speed = 10, randomness = 0, signal } = {}) {
-    console.log(text, speed, randomness);
-
     if (typeof text !== "string") throw new TypeError("text must be a string");
     if (!Number.isFinite(speed) || speed <= 0) {
         throw new RangeError("speed must be a finite number greater than zero");

@@ -1,5 +1,6 @@
 import koffi from "koffi";
 import "./inc/types.js";
+import "./inc/struct.js";
 import { getWindowPixel, getPixel } from "./pixel.js";
 import { capture } from "./capture.js";
 import { setTaskbarVisible } from "./taskbar.js";
@@ -115,12 +116,19 @@ export function WindowDetail(hwnd) {
 export class Window {
     static winEventHooks = new Map();
 
-    static all() {
+    static all(options = {}) {
         const windows = [];
-        EnumWindows((hwnd) => {
-            windows.push(new Window(hwnd));
-            return 1;
+        const success = EnumWindows((hwnd) => {
+            const win = new Window(hwnd);
+            if (options.mustHaveTitle && !win.title) return 1;
+            if (options.mustHaveClassName && !win.className) return 1;
+            if (options.mustHaveSize && (win.width === 0 || win.height === 0)) return 1;
+            if (options.isApplication !== undefined && win.isApplicationWindow !== options.isApplication) return 1;
+            if (options.isVisible !== undefined && win.isVisibleOnDesktop !== options.isVisible) return 1;
+            windows.push(win);
+            return 1; // Continue enumeration.
         }, 0);
+        if (!success) throw new Error("Unable to enumerate windows");
         return windows;
     }
 
@@ -237,7 +245,7 @@ export class Window {
         return this.children;
     }
 
-    capture(cx = 0, cy = 0, cw, ch) {
+    capture(cx = 0, cy = 0, cw, ch, outputPath) {
         let { x: _x, y: _y, width: _width, height: _height } = this.client;
 
         const x = Math.round(_x + cx);
@@ -245,7 +253,7 @@ export class Window {
         const width = Math.round(cw || _width);
         const height = Math.round(ch || _height);
 
-        return capture(x, y, width, height);
+        return capture(x, y, width, height, outputPath);
     }
 
     onChange(callback) {
